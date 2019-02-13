@@ -27,7 +27,7 @@ for day in range(1, webContent.count("data-day")-1):
         # Remove the preceding events dialog
         dayContent   = dayContent[dayContent.index('Click for event details')+20:]
 
-        
+        getEventObject(dayContent)
 
         # Get json form of the event to send to firebase
 #        jsonEvent = createJSONevent(day, )

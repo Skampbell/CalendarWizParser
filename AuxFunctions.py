@@ -38,25 +38,115 @@ def getLocationText(dayContent):
 
     return locationContent
 
+# Get all teams from event text
+def getTeams(event):
+    # Decleration
+    noTime = ''
+    teams  = []
+    # Cut off time
+    if event.count(':') is not 0:
+        noTime = event[:event.index(':')]
+        noTime = noTime[:noTime.rfind(' ')]
+    
+    
+    # Get team if it exsits
+    while noTime.count('-') is not 0:
+        # Get age
+        teamAge = noTime[:noTime.index('-')].strip()
+        noTime = noTime[noTime.index('-')+1:]
+    
+        # Get coach or number
+        if noTime.count(' ') is not 0:
+            coach = noTime[:noTime.index(' ')].strip()
+        else:
+            coach = noTime.strip()
+        
+        # Remove any commas
+        coach = coach.replace(',','')
+        
+        # Remove coach from notime
+        noTime = noTime[noTime.index(coach) + len(coach):]
+        if noTime.count('/') is not 0:
+            noTime = noTime[noTime.index('/') + 1:]
+        
+        # create the team
+        team = {
+            'Age': teamAge,
+            'Coach': coach
+            }
 
+        # Add to  list of teams
+        teams.append(team)
+        
+    return teams
+
+# Get time range of event
+def getTime(content):
+    
+    # If easy time
+    if content.count(':') is not 0:
+        # Remove event description
+        timeText = content[content.index(':')-2:]
+        timeText = timeText.strip()
+    
+        # Get start time components
+        startHour = timeText[:timeText.index(':')]
+        startMin  = timeText[timeText.index(':')+1:5]
+        isAM      = startMin[-1:] == 'a'
+        
+        # Get end time
+        endHour = timeText[timeText.index(startMin):]
+        endHour = endHour[:endHour.index(':')]
+        endHour = endHour[endHour.rfind(' '):].strip()
+        endMin  = timeText[-4:].strip()
+        endMin  = endMin[:2]
+        
+        # Remove am/pm
+        if len(startMin) is not 2:
+            startMin = startMin[:2]
+        
+        # Check if hour is int
+        try:
+            x = int(startHour) + 1
+        except:
+            # If not try again
+            return getTime(timeText[4:])
+    
+        # Create time objects
+        startTime = {
+            'hour'  : int(startHour),
+            'minute': int(startMin)
+            }
+        endTime = {
+            'hour'  : int(endHour),
+            'minute': int(endMin)
+            }
+
+        time = {
+            'start': startTime,
+            'end'  : endTime,
+            'AM'   : isAM
+            }
+
+        return time
+    else:
+        return None
+        timeText = content[content.rfind(' '):]
+    return timeText
 # Return event object
 def getEventObject(dayContent):
     # Call function to remove first event from day
     eventContent = getEventText(dayContent)
     
-    # Print the event name
-    print(eventContent)
+    # If the practice is not at tstreet it has location
+    if dayContent.index('span') < 200:
         
-        # If the practice is not at tstreet it has location
-        if dayContent.index('span') < 200:
-            
-            # Get location text
-            locationContent = getLocationText(dayContent)
-            
-            # Print location
-            print(locationContent)
+        # Get location text
+        locationContent = getLocationText(dayContent)
 
-    event = {
-
-}
+#    print(getTeams(eventContent))
+    print(getTime(eventContent))
+#    event = {
+#        "Teams" : getTeams(eventContent)
+#    }
 
