@@ -77,7 +77,10 @@ def getTeams(event):
 
         # Add to  list of teams
         teams.append(team)
-        
+
+    # If no teams return it
+    if len(teams) is 0:
+        return None
     return teams
 
 # Get time range of event
@@ -92,18 +95,22 @@ def getTime(content):
         # Get start time components
         startHour = timeText[:timeText.index(':')]
         startMin  = timeText[timeText.index(':')+1:5]
-        isAM      = startMin[-1:] == 'a'
+        isStartAM = startMin[-1:] == 'a'
+        
         
         # Get end time
         endHour = timeText[timeText.index(startMin):]
         endHour = endHour[:endHour.index(':')]
         endHour = endHour[endHour.rfind(' '):].strip()
         endMin  = timeText[-4:].strip()
-        endMin  = endMin[:2]
+        endMin  = endMin[:3]
+        isEndAM = endMin[-1:] == 'a'
         
         # Remove am/pm
         if len(startMin) is not 2:
             startMin = startMin[:2]
+        if len(endMin) is not 2:
+            endMin   = endMin[:2]
         
         # Check if hour is int
         try:
@@ -112,6 +119,11 @@ def getTime(content):
             # If not try again
             return getTime(timeText[4:])
     
+        # Adjust time for pm
+        if not isStartAM:
+            startHour = int(startHour)+12
+        if not isEndAM:
+            endHour   = int(endHour)+12
         # Create time objects
         startTime = {
             'hour'  : int(startHour),
@@ -124,15 +136,104 @@ def getTime(content):
 
         time = {
             'start': startTime,
-            'end'  : endTime,
-            'AM'   : isAM
+            'end'  : endTime
             }
 
         return time
     else:
         return None
-        timeText = content[content.rfind(' '):]
-    return timeText
+
+# Gets the title of an event
+def getTitleEvent(content):
+    # DECLERATION
+    time = ''
+    title = ''
+    
+    # Get time and title of the event
+    if content.count(':') is not 0:
+        # Get time
+        timeText = content[content.rfind(':')-11:].strip()
+        
+        # Start time
+        startHour = int(timeText[:timeText.index(':')])
+        startMin  = int(timeText[timeText.index(':')+1:timeText.index(':')+3])
+        isStartAM = timeText[timeText.index(':')+3] is 'a'
+        
+        # End time
+        endTime = timeText[timeText.rfind(' '):].strip()
+        endHour = endTime[:endTime.index(':')]
+        endMin  = endTime[endTime.index(':')+1:-1]
+        isEndAM = endMin[-1] is 'a'
+        
+        # Remove am/pm
+        if len(endMin) is not 2:
+            endMin   = endMin[:2]
+        
+        # Check if hour is int
+        try:
+            x = int(startHour) + 1
+        except:
+            # If not try again
+            return getTime(timeText[4:])
+        
+        # Adjust time for pm
+        if not isStartAM:
+            startHour = int(startHour)+12
+        if not isEndAM:
+            endHour   = int(endHour)+12
+        # Create time objects
+        startTime = {
+            'hour'  : int(startHour),
+            'minute': int(startMin)
+        }
+        endTime = {
+            'hour'  : int(endHour),
+            'minute': int(endMin)
+        }
+
+        time = {
+            'start': startTime,
+            'end'  : endTime
+        }
+        
+        
+        title = content[:-len(timeText)].strip()
+
+        # Create event object
+        event = {
+            'title': title,
+            'time' : time
+        }
+    
+        return event
+
+    # If no time, only a title
+    else:
+        title = content
+        # Create event object
+        event = {
+            'title': title
+        }
+        
+        return event
+    
+
+
+# Get a location object
+def getLocation(content):
+    if content is None:
+        locationName = 'Tstreet'
+    else:
+        locationName = content
+    # Create location object
+    location = {
+        'location': locationName
+    }
+
+    return location
+
+def getTitle(content):
+    if
 # Return event object
 def getEventObject(dayContent):
     # Call function to remove first event from day
@@ -143,10 +244,24 @@ def getEventObject(dayContent):
         
         # Get location text
         locationContent = getLocationText(dayContent)
+    else:
+        locationContent = None
 
-#    print(getTeams(eventContent))
-    print(getTime(eventContent))
-#    event = {
-#        "Teams" : getTeams(eventContent)
-#    }
+    # Get teams and times
+    teams    = getTeams(eventContent)
+    time     = getTime(eventContent)
+    location = getLocation(locationContent)
+    
+    # If event has no teams get the title
+    if teams is None:
+            event = getTitleEvent(eventContent)
+            return event
 
+    # Create event
+    event = {
+        'teams'   : teams,
+        'time'    : time,
+        'location': location
+    }
+
+    return event
