@@ -6,7 +6,7 @@ from   AuxFunctions      import *
 from   FirebaseFunctions import *
 
 # Set url to calendar page made by CalendarWiz
-url = 'https://www.calendarwiz.com/calendars/calendar.php?crd=tstreetvolleyballclub&cid%5B%5D=all&lid%5B%5D=empty&&PHPSESSID=654055e10cc9e3a199b6acdce53fee1a&jsenabled=1&winh=884&winw=1324&inifr=false'
+url = 'https://www.calendarwiz.com/calendars/calendar.php?crd=tstreetvolleyballclub&op=cal&month=4&year=2019'
 
 # Use library to open socket request to url
 response = urllib2.urlopen(url)

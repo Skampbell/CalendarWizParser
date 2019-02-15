@@ -232,8 +232,6 @@ def getLocation(content):
 
     return location
 
-def getTitle(content):
-    if
 # Return event object
 def getEventObject(dayContent):
     # Call function to remove first event from day
